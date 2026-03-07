@@ -178,7 +178,7 @@ public class EmailService {
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, StandardCharsets.UTF_8.name());
 
-            String safeFrom = fromEmail != null ? fromEmail : "noreply@labmanager.com";
+            String safeFrom = fromEmail != null ? fromEmail : "onboarding@resend.dev";
             helper.setFrom(safeFrom);
             helper.setTo(to);
             helper.setSubject(subject != null ? subject : "No Subject");
@@ -201,7 +201,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name());
 
-            String safeFrom = fromEmail != null ? fromEmail : "noreply@labmanager.com";
+            String safeFrom = fromEmail != null ? fromEmail : "onboarding@resend.dev";
             helper.setFrom(safeFrom);
             helper.setTo(to != null ? to : "");
             helper.setSubject(subject != null ? subject : "Notification");
