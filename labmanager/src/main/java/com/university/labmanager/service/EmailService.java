@@ -9,6 +9,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import java.net.HttpURLConnection;
+import java.io.IOException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +44,18 @@ public class EmailService {
 
     // Google Apps Script endpoint built by user
     private static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqnzpEUfRU8ec1F2EGQP7naGen0E0_pGhIZqCVWQF123rNFk1ybnqTPGbanZR_0Kx-/exec";
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public EmailService(TemplateEngine templateEngine) {
+        this.templateEngine = templateEngine;
+        this.restTemplate = new RestTemplate(new SimpleClientHttpRequestFactory() {
+            @Override
+            protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+                super.prepareConnection(connection, httpMethod);
+                connection.setInstanceFollowRedirects(true);
+            }
+        });
+    }
 
     @Async
     public void sendReservationConfirmation(Reservation reservation, User user) {
