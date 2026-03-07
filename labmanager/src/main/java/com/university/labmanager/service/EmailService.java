@@ -34,7 +34,6 @@ import java.util.Map;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class EmailService {
 
     private final TemplateEngine templateEngine;
@@ -46,6 +45,7 @@ public class EmailService {
     private static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqnzpEUfRU8ec1F2EGQP7naGen0E0_pGhIZqCVWQF123rNFk1ybnqTPGbanZR_0Kx-/exec";
     private final RestTemplate restTemplate;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public EmailService(TemplateEngine templateEngine) {
         this.templateEngine = templateEngine;
         this.restTemplate = new RestTemplate(new SimpleClientHttpRequestFactory() {
