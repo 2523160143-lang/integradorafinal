@@ -1462,7 +1462,6 @@ const AdminDashboard: React.FC = () => {
                                 onScan={(result) => handleScan(result)}
                                 onError={(error) => console.log(error)}
                                 components={{
-
                                     torch: false
                                 }}
                                 styles={{
@@ -1472,9 +1471,29 @@ const AdminDashboard: React.FC = () => {
                             {/* Overlay guide */}
                             <div className="absolute inset-0 border-2 border-blue-500/50 m-12 rounded-lg pointer-events-none animate-pulse"></div>
                         </div>
-                        <p className="text-center text-slate-500 dark:text-slate-400 mt-4 text-sm">
-                            Apunta la cámara al código QR del estudiante.
-                        </p>
+
+                        <div className="mt-6 pt-4 border-t border-slate-200 dark:border-white/10">
+                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">
+                                ¿Tienes un escáner USB o código manual?
+                            </label>
+                            <input
+                                autoFocus
+                                type="text"
+                                placeholder="Ej: RES-123"
+                                className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        const code = e.currentTarget.value;
+                                        if (code) {
+                                            handleScan([{ rawValue: code }]);
+                                        }
+                                    }
+                                }}
+                            />
+                            <p className="text-center text-[10px] text-slate-500 dark:text-slate-400 mt-2">
+                                Pasa el escáner externo o escribe el código y presiona Enter.
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}
