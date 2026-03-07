@@ -1538,13 +1538,9 @@ const AdminDashboard: React.FC = () => {
                                     onClick={() => {
                                         // Trigger Handover
                                         if (window.confirm('¿Entregar equipo al estudiante?')) {
-                                            api.post(`/reservations/${scannedReservation.id}/handover`)
-                                                .then(() => {
-                                                    toast.success('Equipo entregado exitosamente');
-                                                    setScannedReservation(null);
-                                                    fetchData(); // Refresh list
-                                                })
-                                                .catch(() => toast.error('Error al entregar equipo'));
+                                            handleStatusUpdate(scannedReservation.id, 'ACTIVE').then(() => {
+                                                setScannedReservation(null);
+                                            });
                                         }
                                     }}
                                     className="w-full bg-green-600 hover:bg-green-500 text-slate-900 dark:text-white py-4 rounded-xl font-bold flex items-center justify-center shadow-lg shadow-green-600/20"
@@ -1557,17 +1553,10 @@ const AdminDashboard: React.FC = () => {
                             {scannedReservation.status === 'ACTIVE' && (
                                 <button
                                     onClick={() => {
-                                        // Trigger Return using existing modal or direct API?
-                                        // Integrating with existing "Return Modal" (rating/incidents) is complex here.
-                                        // For quick action, let's assume standard return OK.
                                         if (window.confirm('¿Recibir equipo sin novedades?')) {
-                                            api.post(`/reservations/${scannedReservation.id}/return`)
-                                                .then(() => {
-                                                    toast.success('Equipo recibido exitosamente');
-                                                    setScannedReservation(null);
-                                                    fetchData();
-                                                })
-                                                .catch(() => toast.error('Error al recibir equipo'));
+                                            handleStatusUpdate(scannedReservation.id, 'COMPLETED').then(() => {
+                                                setScannedReservation(null);
+                                            });
                                         }
                                     }}
                                     className="w-full bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white py-4 rounded-xl font-bold flex items-center justify-center shadow-lg shadow-blue-600/20"
