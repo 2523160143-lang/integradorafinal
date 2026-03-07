@@ -82,6 +82,26 @@ public class ReservationService {
         reservation = reservationRepository.save(reservation);
         notificationService.notifyAdmins("Nueva solicitud de reserva (" + laptop.getModel() + ") por " + subject,
                 "RESERVATION");
+
+        // Notify user their reservation was received
+        System.out.println(">>> SENDING PENDING EMAIL TO STUDENT: " + user.getId());
+        String body = "Hola " + (user.getFullName() != null ? user.getFullName() : "") + ",\n\n" +
+                "Hemos recibido tu solicitud de reserva para el equipo " + laptop.getModel() + ".\n" +
+                "En breve un administrador la revisará y recibirás otro correo indicando si fue aprobada o rechazada.\n\n"
+                +
+                "Materia: " + subject + "\n" +
+                "Inicio: " + start.toString() + "\n" +
+                "Fin: " + end.toString() + "\n\n" +
+                "Atentamente,\nEl equipo de LabManager.";
+
+        // Fetch full user to get email safely since we only have ID created
+        // artificially above
+        com.university.labmanager.model.User fullUser = userRepository.findById(userId).orElse(null);
+        if (fullUser != null && fullUser.getEmail() != null) {
+            emailService.sendSimpleMessage(fullUser.getEmail(),
+                    "Solicitud de Reserva Recibida (Pendiente) - LabManager", body);
+        }
+
         return reservation;
     }
 
@@ -158,6 +178,7 @@ public class ReservationService {
     }
 
     private final EmailService emailService;
+    private final com.university.labmanager.repository.UserRepository userRepository;
 
     public com.university.labmanager.model.Reservation updateStatus(Long reservationId,
             com.university.labmanager.model.enums.ReservationStatus status) {
