@@ -58,6 +58,16 @@ public class ReservationController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getReservation(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(reservationService.getReservationById(id));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error fetching reservation: " + e.getMessage()));
+        }
+    }
+
     @PutMapping("/{id}/status")
     public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestParam String status) {
 

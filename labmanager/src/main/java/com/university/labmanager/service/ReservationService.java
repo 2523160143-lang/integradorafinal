@@ -177,6 +177,11 @@ public class ReservationService {
         return reservationRepository.findAllWithDetails();
     }
 
+    public com.university.labmanager.model.Reservation getReservationById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation not found with ID: " + id));
+    }
+
     private final EmailService emailService;
     private final com.university.labmanager.repository.UserRepository userRepository;
 
