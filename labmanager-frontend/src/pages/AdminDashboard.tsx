@@ -836,16 +836,7 @@ const AdminDashboard: React.FC = () => {
                             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Centro de Entregas</h1>
                             <div className="mb-4 flex justify-end">
                                 <button
-                                    onClick={() => {
-                                        const code = prompt("Simulador de Escáner QR\nEscanea el código del alumno (escribe 'RES-ID'):");
-                                        if (code && code.startsWith('RES-')) {
-                                            const id = parseInt(code.split('-')[1]);
-                                            if (!isNaN(id)) {
-                                                handleStatusUpdate(id, 'ACTIVE');
-                                                toast.success(`Reserva #${id} procesada por QR`);
-                                            }
-                                        }
-                                    }}
+                                    onClick={() => setShowScanner(true)}
                                     className="bg-blue-600 text-slate-900 dark:text-white px-4 py-2 rounded-lg flex items-center hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/20"
                                 >
                                     <QrCode className="w-5 h-5 mr-2" /> Escanear Entrega (Cámara)
