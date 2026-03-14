@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 public class ReportService {
 
     private final LaptopRepository laptopRepository;

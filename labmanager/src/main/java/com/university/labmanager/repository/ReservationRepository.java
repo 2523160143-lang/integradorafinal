@@ -22,7 +22,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
         List<Reservation> findByLaptopId(Long laptopId);
 
-        @org.springframework.data.jpa.repository.Query("SELECT r FROM Reservation r WHERE " +
+        @org.springframework.data.jpa.repository.Query("SELECT r FROM Reservation r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.laptop WHERE " +
                         "(:status IS NULL OR r.status = :status) AND " +
                         "(:start IS NULL OR r.startTime >= :start) AND " +
                         "(:end IS NULL OR r.endTime <= :end) AND " +
