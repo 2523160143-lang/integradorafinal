@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { OfflineManager } from './OfflineManager';
 
-const API_URL = 'https://integradorafinal.onrender.com/api'; // Production Backend URL
+const API_URL = 'https://king-prawn-app-pgc6g.ondigitalocean.app/api'; // DigitalOcean Backend URL
 
 const api = axios.create({
     baseURL: API_URL,
