@@ -1243,7 +1243,7 @@ const AdminDashboard: React.FC = () => {
                                             )}
                                             {inc.evidencePath && (
                                                 <button
-                                                    onClick={() => setViewingEvidence(`https://integradorafinal.onrender.com${inc.evidencePath}`)}
+                                                    onClick={() => setViewingEvidence(`https://king-prawn-app-pgc6g.ondigitalocean.app${inc.evidencePath}`)}
                                                     className="text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-3 py-2 rounded flex items-center justify-center border border-blue-500/20"
                                                 >
                                                     📷 Ver Foto

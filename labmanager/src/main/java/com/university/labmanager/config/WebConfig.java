@@ -11,10 +11,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-        // Serve uploaded files from the absolute path or relative to project root
-        // Assuming uploads are stored in 'uploads/' directory in project root
+        // Resolve absolute path dynamically to work reliably in both Windows and Linux Docker
+        java.nio.file.Path uploadDir = java.nio.file.Paths.get("uploads");
+        String uploadPath = uploadDir.toFile().getAbsolutePath();
+        
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+                .addResourceLocations("file:" + uploadPath + "/");
     }
-
 }
