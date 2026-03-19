@@ -1,92 +1,73 @@
-# LabManager - Solana Smart Contract 🦀
+# 🎓 LabManager - Sistema Integral de Gestión de Laboratorios
 
-¡Bienvenido al repositorio de **LabManager**! Este es un proyecto desarrollado de forma nativa en **Rust** utilizando el framework **Anchor** para la blockchain de Solana.
+¡Bienvenido al repositorio oficial de **LabManager**! 🚀
 
-Este proyecto fue construido como requisito para la certificación de desarrollo en Solana, cumpliendo con todos los lineamientos técnicos exigidos:
-- ✅ **Proyecto de temática libre** (Gestión de Inventario de Laptops).
-- ✅ **Desarrollado 100% en Rust** con Anchor.
-- ✅ **Implementación de CRUD completo + uso de cuentas PDA**.
-- ✅ **Documentación y explicación de uso** (Este README).
+LabManager es un sistema moderno, eficiente y en tiempo real diseñado para universidades e instituciones educativas. Permite gestionar fácilmente el **inventario**, **préstamo** y **mantenimiento** de equipos de cómputo, optimizando el tiempo tanto de administradores como de alumnos y profesores.
 
 ---
 
-## 📌 Descripción del Proyecto
+## ✨ Características Principales
 
-**LabManager** es un contrato inteligente descentralizado (Smart Contract) que permite a las universidades o instituciones administrar el préstamo, devolución y mantenimiento de sus equipos de cómputo (Laptops). 
-
-A través de este programa on-chain, un administrador puede dar de alta un "Laboratorio" con un límite de capacidad física, añadir equipos al inventario, prestarlos a estudiantes vinculando sus billeteras (Pubkeys), y mandarlos a mantenimiento técnico de manera inmutable y transparente en la blockchain.
-
-### ⚙️ Estructuras de Datos Principales
-- **Laboratorio (PDA):** Almacena el nombre, la capacidad máxima, la Public Key del administrador dueño (owner) y un vector de `Laptop`s asignadas al espacio.
-- **Laptop (Struct Interno):** Contiene el modelo, memoria RAM, estado del equipo, contador histórico de usos y la Public Key del usuario que la tiene prestada (Option).
-- **EstadoLaptop (Enum):** Máquina de estados (`Disponible`, `Prestado`, `EnMantenimiento`).
+- 🔄 **Notificaciones en Tiempo Real (WebSockets):** Ni alumnos ni administradores tienen que recargar la página. Aprobaciones, rechazos y devoluciones se actualizan al instante usando `SockJS` y `STOMP`.
+- 📱 **Generación y Escaneo de Código QR:** Agiliza la entrega de equipos mediante autenticación visual con QR. Escanea desde el panel administrativo usando la cámara de tu dispositivo.
+- 👥 **Módulo Multi-Rol (Autenticación JWT):** Experiencias personalizadas y seguras para **Alumnos**, **Profesores** (Reservas Grupales) y **Administradores**.
+- 🤖 **Asistente Virtual (LabBot):** Un chatbot de soporte interactivo integrado en el cliente para guiar a los usuarios en sus tareas.
+- 📊 **Reportes Dinámicos (PDF / Excel):** Generación de gráficas de incidencias, inventario y solicitudes con un clic.
+- 🌒 **Soporte Nativo Modo Oscuro:** Interfaz ergonómica que se adapta a las preferencias del sistema utilizando `TailwindCSS`.
 
 ---
 
-## 🛠 Arquitectura Técnica (CRUD + PDA)
+## 🛠️ Stack Tecnológico
 
-El proyecto demuestra un dominio de las operaciones fundamentales (CRUD) en Solana mediante la manipulación de una **PDA (Program Derived Address)** vinculada al administrador.
+El proyecto utiliza una arquitectura estricta cliente-servidor nativa para la Nube.
 
-### 1. Creación de PDA (Create)
-El laboratorio se inicializa dinámicamente usando semillas (seeds): `[b"lab_v2", owner.key().as_ref()]`.
-- **`crear_laboratorio`**: Instancia un nuevo laboratorio limitando su tamaño on-chain (máximo 50 equipos) para optimizar el pago de renta (InitSpace).
+### Backend (Servidor)
+- **Java 17 / Spring Boot 3**
+- **Spring Security (JWT)**
+- **Spring Data JPA (Specifications)**
+- **WebSocket (STOMP)**
+- **PostgreSQL (Supabase en Producción, MySQL en Desarrollo)**
+- **iTextPDF & Apache POI** (Generación de Reportes)
 
-### 2. Altas (Create - Inventario)
-- **`agregar_laptop`**: Permite al owner añadir un equipo nuevo. Valida que no se exceda la `capacidad_maxima` definida al crear la PDA.
-
-### 3. Lectura (Read)
-- **`ver_laptops`**: Lee e imprime en el log (Program Logs) el estado completo del vector de laptops en memoria on-chain.
-
-### 4. Actualizaciones (Update - Lógica de Negocio)
-- **`gestionar_prestamo`**: Localiza un equipo existente y muta su estado. Si está disponible, la marca como *Prestada* a una Pubkey y aumenta el contador de usos. Si estaba prestada, la retorna a estado *Disponible*.
-- **`reportar_mantenimiento`**: Transición de seguridad. Manda equipos a un estado inutilizable por cuestiones técnicas.
-
-### 5. Borrado (Delete)
-- **`eliminar_laptop`**: Recorre el vector mutable, localiza el modelo exacto y lo elimina (remove) para liberar el espacio on-chain de forma definitiva.
+### Frontend (Cliente)
+- **React 18 con TypeScript**
+- **Vite** (Bundler optimizado)
+- **TailwindCSS** (Estilos y Dark Mode)
+- **Recharts** (Visualización de datos)
+- **Axios & SockJS** (Middleware e interacción con la API)
 
 ---
 
-## 🚀 Cómo interactuar con el contrato
+## 📖 Documentación
 
-Si deseas utilizar este código, se asume que tienes instalado el entorno para Solana (`solana-cli`, `Rust`, y `Anchor`).
+Si deseas conocer más a fondo cómo desplegar o utilizar la plataforma, consulta nuestros manuales oficiales incluidos en la raíz de este proyecto:
 
-1. **Clonar e iniciar el entorno:**
-   Copia el archivo `lib.rs` dentro de la ruta `programs/tu_proyecto/src/` de un proyecto Anchor vacío.
+👉 **[Manual de Usuario](./manual_de_usuario.md):** Guía paso a paso explicando cómo ser administrador, pedir laptops siendo estudiante, o rentar todo el laboratorio siendo profesor.
 
-2. **Compilar el programa:**
+👉 **[Manual Técnico](./labmanager/manual_tecnico.md):** Documentación arquitectónica profunda para desarrolladores (Estructura de Spring, configuraciones de JWT, CORS y modelos de base de datos).
+
+---
+
+## 🚀 Instalación Local
+
+Si clonas este repositorio para desarrollo:
+
+1. **Clonar repositorio:**
    ```bash
-   anchor build
+   git clone https://github.com/supernova96/integradorafinal.git
    ```
-   *(Asegúrate de copiar el nuevo `program_id` que se genere en tu consola y pegarlo en la macro `declare_id!("TU_NUEVO_ID");` de `lib.rs`).*
 
-3. **Pruebas Locales:**
-   Levanta tu red de prueba local Validator:
+2. **Levantar el Backend (Dentro de la carpeta `/labmanager`):**
+   Asegúrate de configurar los parámetros `spring.datasource.url` en tu `application.properties` apuntando a tu base de datos local y ejecuta:
    ```bash
-   solana-test-validator
+   ./mvnw spring-boot:run
    ```
 
-4. **Despliegue:**
-   Manda el programa a la red de desarrolladores de solana (Devnet) o a tu Localhost:
+3. **Levantar el Frontend (Dentro de la carpeta `/labmanager-frontend`):**
    ```bash
-   anchor deploy
-   ```
-
-5. **Interactuar mediante TypeScript (Tests):**
-   Puedes invocar la instrucción inicializadora pagando la renta del espacio de la siguiente manera:
-   ```typescript
-   const [laboratorioPda] = PublicKey.findProgramAddressSync(
-     [Buffer.from("lab_v2"), provider.wallet.publicKey.toBuffer()],
-     program.programId
-   );
-
-   await program.methods.crearLaboratorio("Lab Computo A", 20)
-     .accounts({
-       owner: provider.wallet.publicKey,
-       laboratorio: laboratorioPda,
-       systemProgram: SystemProgram.programId,
-     })
-     .rpc();
+   npm install
+   npm run dev
    ```
 
 ---
-*
+*Desarrollado como proyecto integrador de universidad. Creado con ❤️ por el equipo de LabManager.*
