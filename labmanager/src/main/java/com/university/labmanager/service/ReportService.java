@@ -94,11 +94,36 @@ public class ReportService {
 
     public byte[] generateReservationReportPdf(String status, LocalDateTime start, LocalDateTime end, Long studentId,
             String professor) throws DocumentException {
-        List<Reservation> reservations = reservationRepository.findReservationsByFilters(
-                status != null && !status.isEmpty() && !"ALL".equals(status)
-                        ? com.university.labmanager.model.enums.ReservationStatus.valueOf(status)
-                        : null,
-                start, end, studentId, professor != null && !professor.isEmpty() ? professor : null);
+        
+        org.springframework.data.jpa.domain.Specification<Reservation> spec = (root, query, cb) -> {
+            // Include related entities to prevent LazyInitializationException
+            if (query.getResultType().equals(Reservation.class)) {
+                root.fetch("user", jakarta.persistence.criteria.JoinType.LEFT);
+                root.fetch("laptop", jakarta.persistence.criteria.JoinType.LEFT);
+            }
+            
+            java.util.List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+            
+            if (status != null && !status.isEmpty() && !"ALL".equals(status)) {
+                predicates.add(cb.equal(root.get("status"), com.university.labmanager.model.enums.ReservationStatus.valueOf(status)));
+            }
+            if (start != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("startTime"), start));
+            }
+            if (end != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("endTime"), end));
+            }
+            if (studentId != null) {
+                predicates.add(cb.equal(root.join("user", jakarta.persistence.criteria.JoinType.LEFT).get("id"), studentId));
+            }
+            if (professor != null && !professor.isEmpty()) {
+                predicates.add(cb.like(root.get("professor"), "%" + professor + "%"));
+            }
+            
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        List<Reservation> reservations = reservationRepository.findAll(spec);
 
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
