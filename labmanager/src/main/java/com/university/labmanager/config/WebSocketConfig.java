@@ -46,8 +46,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Aquí es donde el frontend (React) intentará conectarse
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175",
-                        "http://localhost:3000") // Permite al Frontend de Vite o Express conectarse
+                .setAllowedOriginPatterns("*") // Permite al Frontend desplegado conectarse
                 .withSockJS();
     }
 

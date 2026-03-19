@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../services/api';
 
 export const useWebSocket = (subscribeUrl?: string, onMessage?: (message: any) => void) => {
     const { user } = useAuth();
@@ -12,7 +13,10 @@ export const useWebSocket = (subscribeUrl?: string, onMessage?: (message: any) =
         if (!user || !user.token) return;
 
         const client = new Client({
-            webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+            webSocketFactory: () => {
+                const wsUrl = API_URL.replace('/api', '/ws');
+                return new SockJS(wsUrl);
+            },
             connectHeaders: {
                 Authorization: `Bearer ${user.token}`,
             },
