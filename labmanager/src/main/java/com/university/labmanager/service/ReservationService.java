@@ -228,11 +228,11 @@ public class ReservationService {
             safeReservation.setSubject(updated.getSubject());
             safeReservation.setStartTime(updated.getStartTime());
             safeReservation.setEndTime(updated.getEndTime());
-            safeReservation.setLaptop(safeLaptop);
-
             if (status == com.university.labmanager.model.enums.ReservationStatus.APPROVED) {
                 emailService.sendReservationConfirmation(safeReservation, safeUser);
                 notificationService.createNotification(safeUser.getId(), "Tu reserva del equipo " + safeLaptop.getModel() + " ha sido APROBADA.", "RESERVATION");
+            } else if (status == com.university.labmanager.model.enums.ReservationStatus.ACTIVE) {
+                notificationService.createNotification(safeUser.getId(), "Tu sesión con el equipo " + safeLaptop.getModel() + " ha INICIADO.", "RESERVATION");
             } else if (status == com.university.labmanager.model.enums.ReservationStatus.COMPLETED) {
                 emailService.sendReturnConfirmation(safeReservation, safeUser);
                 notificationService.createNotification(safeUser.getId(), "Has devuelto el equipo " + safeLaptop.getModel() + " exitosamente. ¡Gracias!", "RESERVATION");
