@@ -1,101 +1,83 @@
-# Manual Técnico - LabManager
-
-**Versión:** 1.0
-**Fecha:** 3 de Febrero de 2026
-**Proyecto:** Sistema de Gestión de Laboratorios
-
----
+# ⚙️ Manual del Programador (Técnico) - LabManager V2.0
 
 ## 1. Introducción
-Este documento detalla los aspectos técnicos del desarrollo e implementación del sistema *LabManager*. Describe las herramientas utilizadas, la estructura del código, la configuración del entorno, la mensajería en tiempo real y la arquitectura de la base de datos en la nube. Su propósito es servir como guía para desarrolladores y administradores de sistemas.
-
-## 2. Tecnologías Utilizadas (Stack Tecnológico)
-
-### 2.1 Backend (Servidor)
-*   **Lenguaje:** Java 17.
-*   **Framework:** Spring Boot 3.2.0.
-*   **Seguridad:** Spring Security + JWT (JSON Web Tokens).
-*   **Tiempo Real:** Spring WebSocket + STOMP (Manejo de notificaciones en vivo a usuarios conectados).
-*   **Persistencia:** Spring Data JPA + Hibernate (Uso de JPA Specifications para consultas dinámicas complejas).
-*   **Base de Datos:** PostgreSQL en la nube (Hosteado en Supabase) para Producción.
-*   **Herramientas:** Maven (Gestión de dependencias), Lombok.
-*   **Reportes:** iText (PDF) y Apache POI (Excel).
-
-### 2.2 Frontend (Cliente)
-*   **Lenguaje:** TypeScript + React 18.
-*   **Build Tool:** Vite.
-*   **Estilos:** TailwindCSS (Diseño Utility-First) con soporte nativo de Modo Oscuro.
-*   **Librerías Clave:**
-    *   `axios`: Consumo de API REST.
-    *   `sockjs-client` y `@stomp/stompjs`: Comunicación bidireccional por WebSockets.
-    *   `react-router-dom`: Navegación SPA.
-    *   `react-hook-form`: Gestión de formularios.
-    *   `lucide-react`: Iconografía SVG ligera.
-    *   `recharts`: Gráficos de analíticas dinámicos.
-    *   `react-qr-code`: Generación de códigos QR de estado para reservas.
-    *   `@yudiel/react-qr-scanner`: Escaneo en tiempo real usando APIs modernas del navegador (MediaDevices).
-    *   `date-fns`: Manejo robusto de fechas adaptado al formato ISO.
+Este documento detalla rigurosamente la ingeniería detrás de la plataforma de nueva generación **LabManager**. Está elaborado para que otros desarrolladores, ingenieros de software, o auditores de TI puedan mantener, clonar, depurar o expandir la aplicación a nuevas fases sin pérdida de la lógica fundamental. Aborda arquitectura, estructura de código fuente, y la topología de la base de datos distribuida.
 
 ---
 
-## 3. Arquitectura del Sistema
+## 2. Visión Arquitectónica del Sistema
+El sistema respeta una **Arquitectura en Capas Invertida Controlada (Cliente-Servidor)**:
 
-El sistema sigue una **Arquitectura en Capas** clásica para asegurar la separación de responsabilidades:
-
-1.  **Capa de Presentación (Frontend):** Interfaz de usuario React que consume servicios REST y WebSocket.
-    *   *Sincronización en vivo:* Hook personalizado `useWebSocket` escucha notificaciones del Broker configurado sobre STOMP.
-    *   *Manejo Offline:* `OfflineManager` encola mutaciones (POST, PUT) en LocalStorage cuando no hay red (ServiceWorker interceptors).
-2.  **Capa de Controladores (Controller):** Recibe peticiones HTTP (`GET`, `POST`, etc.) y valida entradas.
-    *   *Manejo de Errores:* `GlobalExceptionHandler` unifica las respuestas de error a estándar JSON.
-3.  **Capa de Servicio (Service):** Contiene la lógica de negocio pura.
-    *   *Mensajería:* `NotificationService` acopla eventos de MongoDB/JPA (Cambios de status de un Laptop) y ejecuta `SimpMessagingTemplate` para enviar la capa de Websocket.
-4.  **Capa de Acceso a Datos (Repository):** Interactúa con la base de datos PostgreSQL.
-    *   *Resolución n+1:* Uso de `LEFT JOIN FETCH` y constructores dinámicos (`Specification`) en JPQL para reducir consultas y mejorar rendimiento de CPU al procesar Reportes.
-5.  **Capa de Datos (Database):** Tablas Relacionales en PostgreSQL (Supabase / DigitalOcean pooling).
+1. **Top-Level (Frontend):** *Single Page Application (SPA)* construida sobre el DOM virtual (React). Totalmente desacoplada lógica e infraestructuralmente (en dominios cruzados).
+2. **Capa Middleware (Gateways y WS):** Conexiones HTTP asíncronas vía capa `Axios` para transacciones y `SockJS/STOMP` persistentes bajo protocolo de túnel *ws://* para emisiones vivas (Broadcasts).
+3. **Capa Negocio (Backend Core):** Una aplicación autónoma de Java Spring montada en base a beans (Dependency Injection) exponiendo Endpoints REST completos.
+4. **Capa Inversión de Datos (ORM):** Hibernate embebido traduce lógica POJO Java (Entidades) directamente a lenguaje Data Definition (DDL) y manipula en lenguaje SQL abstracto de Dialectos agresivos en la nube PostgreSQL.
 
 ---
 
-## 4. Estructura del Proyecto
+## 3. Stack Tecnológico de Referencia
 
-### 4.1 Backend (`/src/main/java/com/university/labmanager`)
-*   `config/`: Configuraciones de Security, Beans de CORS y el `WebSocketConfig` (que define el registry en `/ws`).
-*   `controller/`: Endpoints de la API REST separando recursos como `/api/laptops` o `/api/reports`.
-*   `model/`: Entidades JPA representando el dominio.
-*   `repository/`: Interfaces CRUD que extienden JPA Repository y Specifications.
-*   `service/`: Donde ocurre validación inteligente (Ej: Asignar laptops óptimas basándose en RAM/Software instalado).
-*   `dto/`: Transferencia optimizada sin exponer entidades Hibernate directas.
+### 3.1 Nivel Backend (Java App)
+* **Base:** Java JDK 17 (Criterio para Record Types y Patrones de Switch actuales).
+* **Framework:** Spring Boot Version 3.2.0.
+* **Seguridad (Auth):** Filtros Spring Security 6 encadenados y autorizaciones vía tokens `jjwt-api` sin estados de sesión web clásica de TomCat.
+* **Tiempo Real:** `spring-boot-starter-websocket` anclado a un *MessageBrokerRegistry* local mapeado al canal `/topic`.
+* **Motor PDF/Excéntrico:** `com.itextpdf.itext7-core` y dependencias transitorias de `org.apache.poi` para parseo sintáctico de árboles XML para Microsoft Excel (`.xlsx`).
 
-### 4.2 Frontend (`/src`)
-*   `components/`: Componentes encapsulados que consumen interfaces como `ThemeContext`.
-*   `pages/`: Pantallas principales de navegación y Dashboards en Grid layout.
-*   `hooks/`: Lógicas auto-contenidas (`useWebSocket.ts`, `useAuth.ts`).
-*   `services/`: Encapsulamiento del middleware Axios.
-
----
-
-## 5. Implementación de Módulos Clave
-
-### 5.1 Comunicación en Tiempo Real (Notificaciones)
-LabManager ahora no depende de recargas manuales (Polling). El sistema notifica al administrador en caso de robos, averías o cuando un estudiante pide equipo; asimismo al estudiante se le notifica en el nanosegundo en que su reserva es aprobada para que genere el QR visual en su pantalla, usando un `MessageBroker`.
-
-### 5.2 Módulo Inteligente de Reservas
-*   El backend usa el motor de base de datos para buscar equipos libres (restringiendo fechas, días de la semana y horas laborables de 7am a 9pm).
-*   Los reportes de este módulo utilizan consultas paramétricas altamente dinámicas (`Specification<Reservation>`) que eluden fallos de tipado sobre `NULL` en Dialectos PostgreSQL agresivos.
-
-### 5.3 Módulo de Incidentes (Archivos y Evidencias)
-Acepta fotografías de campo en formato multi-part. DigitalOcean Storage / Directorios estáticos en red alojan físicamente la evidencia que luego el administrador procesa.
+### 3.2 Nivel Frontend (Vite App)
+* **Transpilador:** Typescript estricto sobre Motor Node.js v18+.
+* **Motor Build:** ViteJS. Enormemente superior al obsoleto CRA de Webpack; asegura un *Hot Module Reload* atómico instantáneo.
+* **Lógica UI:** React 18, React Router DOM (v6+), `lucide-react` para carga nativa vectorizada (SVG) iconográfica.
+* **Hardware Interoperacional:** `@yudiel/react-qr-scanner`, encapsula llamadas al `navigator.mediaDevices` nativo del navegador abriendo cámaras multi-lentes.
 
 ---
 
-## 6. Instalación y Despliegue
+## 4. Estructura de Directorios
 
-El despliegue ha sido optimizado para la nube (Cloud-Native):
+### Módulo Backend (`/src/main/java/com/university/labmanager/`)
+* **`config/`:** Define el CORS absoluto (vía `WebSecurityConfig.java`) y el `WebSocketConfig.java` inyectando endpoints púbicos sin re-autenticar STOMP, confiando en cruces de Token Header (`/ws`).
+* **`controller/`:** Controladores anotados típicamente con `@RestController` y mapas Base `/api/v1/X`.
+* **`model/`:** POJOS con Anotaciones JPA típicas (`@Entity`, `@Table`) y directivas de persistencia `@JsonBackReference` y `@JsonManagedReference` vitales para evadir referencias o lazos infinitos `Jackson Serializable Error` al momento de compilar JSONS hacia React.
+* **`repository/`:** Exclusivamente código `extends JpaRepository` y de muy alto valor avanzado `JpaSpecificationExecutor` (Solución radical contra fallos nativos de NullPointers PostgreSQL).
+* **`service/`:** Envolturas de métodos transaccionales (`@Transactional`). Solo aquí descansa la lógica dura del negocio (Por norma de diseño, al Controller no se le incrustaron sentencias `if-else` nativas).
+* **`dto/`:** Modelos anidables vacíos (Beans Planos). Ejemplo: `LaptopHistoryDTO` para mandar un solo string JSON en vez de 3 queries SQL.
 
-1. **Base de Datos:** Postgresql Pooling vía Supavisor.
-2. **Backend (App Platform / DigitalOcean):** Se provee al contenedor variables de entorno `JDBC_DATABASE_URL`, permitiendo que Hibernate actualice DDL/Esquemas con auto-update asegurado.
-3. **Frontend (Vercel / DO / Heroku):** Vite compila los estáticos con minimización extrema que posteriormente Nginx sirve velozmente al navegador del cliente HTTP.
+### Módulo Frontend (`/labmanager-frontend/src/`)
+* **`components/`:** Fragmentos lógicos de nivel atómico (`Button.tsx`, `Chatbot.tsx`, `NotificationDropdown.tsx`).
+* **`pages/`:** Enrutados base: `AdminDashboard.tsx` es una macro-vista monstruo segmentada internamente en Sub-Tags reactivas de estado puro.
+* **`hooks/`:** Controladores abstractos. Elemento valioso `useWebSocket.ts`, re-ejecutado y memorizado solo si cambia su URL base en modo producción vs modo local (Desactible mediante *API_URL* de `api.ts`).
 
 ---
 
-## 7. Conclusión
-LabManager representa un puente sólido entre administración y telemetría de activos informáticos, impulsado por notificaciones interactivas, seguridad JWT e integraciones estables que escalan sobre infraestrucutras IaaS / PaaS.
+## 5. Profundizando Componentes Sofisticados de Código
+
+### A) Implementación de Reportes (JPA Specifications)
+Originalmente, construcciones JPQL duras mediante `@Query(...)` desencadenaron problemas en PostgreSQL al buscar fechas híbridas en la nube originando *HTTP 500 Internals*. 
+La solución programada fue reescribir hacia el sub-lenguaje de **Criteria Builder**:
+Se diseñan clases predictivas `Specification<Reservation> spec = ...` con sentencias lógicas donde si el Filtro es *Nulo*, sencillamente no se añade dinámicamente al SQL final compilado (`Predicate` builder de EntityManager).
+
+### B) Mensajería WebSockets Reactiva 
+No utilizamos librerías pesadas como *Socket.io*. Optamos por STOMP puro de Spring. 
+* El servidor enlista su endpoint público en `/ws`.
+* Se implementó el inyector `SimpMessagingTemplate` dentro de nuestro `NotificationService`. Cuando ocurre el método `createNotification`, se manda forzosamente el canal de túnel `"/user/" + destUserId + "/queue/notifications"`.
+* En React, `@stomp/stompjs` suscriben un hilo oculto de subproceso DOM consumiendo el evento `onConnect`. Si el hook atrapa nueva carga útil, dispara inmediatamente un recálculo estatal (El componente campana de alerta eleva su contador sin alterar los nodos del padre).
+
+### C) Escaneo QR y Media Devices API
+El escaneo de hardware de frontend usa variables de entorno reactivas temporales en el Dom para prevenir *Memory-Leaks* (Pérdidas de memoria RAM en Firefox/Chrome) al no apagar adecuadamente el led/sensor físico de cámara tras escanear un QR. Todo flujo se deshabilita desde la función `useEffect cleanup rutine`.
+
+---
+
+## 6. Base de Datos Cruda (DBA) y Despliegue CI/CD
+El sistema requiere PostgreSQL ^14.0. Se hostea comúnmente en un Cloud Pooling (Supabase / DigitalOcean Databases) asumiendo los puertos fijos remotos `5432` o `6543`.
+
+*   **Propiedades y Variables Críticas del Sistema (`application.properties`):**
+    *   `spring.datasource.url` debe setear el connection pooling correcto: `jdbc:postgresql://<HOST>:<PORT>/postgres?user=...`
+    *   `spring.jpa.hibernate.ddl-auto=update`: Auto-esquematiza las relaciones uno a n, creando llaves de enlace intermedias automáticamente sin programador DBA al momento que reinicie el servidor de Digital Ocean (Ajustable a `validate` en modo ultra-restrictivo).
+
+*   **Variables Cliente Frontend (`.env`):**
+    El cliente obedece a un `axiosBaseUrl` y un conector WsUrl apuntados a un enrutador inverso que mapea subdirectorios de puerto.
+
+El compilado final se unifica utilizando Maven `clean install -DskipTests` y NodeJS se aísla empacando en `/dist` donde todo el TSX de cientos de módulos React termina compactado brutalmente a solo ~3-4 archivos Javascript unificables ultra-ligeros con minificación nativa.
+
+**¿Necesitas Modificar el Código Base?**
+Clona el repositorio desde GitHub, levanta el Docker `postgres` de forma local, configura tus URL en puertos `localhost:8080` (Para Spring) y arranca ViteJS. Las actualizaciones de TypeScript estarán activas al presionar *Guardar*.
