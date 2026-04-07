@@ -22,12 +22,12 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'vite.svg',
+            src: 'icono.svg',
             sizes: '192x192',
             type: 'image/svg+xml'
           },
           {
-            src: 'vite.svg',
+            src: 'icono.svg',
             sizes: '512x512',
             type: 'image/svg+xml'
           }
